@@ -82,7 +82,7 @@ void CreatProcess_fork(int wait_child)
         else
         printf("Wait the child process %d finished! and Write data into pipe \"%s\" success!\n", pr, buf_w);
         
-        exit(EXIT_SUCCESS);
+        // exit(EXIT_SUCCESS);
     }
 }
 

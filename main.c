@@ -9,7 +9,7 @@
 #include "mytime.h"
 #include <string.h>
 #include "process.h"
-
+#include "myfifo.h"
 /*ERROR INFORMATION ABOUT exit(i):
  *0 : Success
  *1 : Operation not permission
@@ -25,6 +25,7 @@
 int main(int argc, char *argv[])
 {   
     static char src_chars[100] = "This is a test of put_chars";
+    static char *fifo_name = "/home/cme/WorkspaceForTQ210/Study/LinuxApp/lesson1/fifotest";
     char buf[100];
     char timenow[30];
     long int usec_start = 0, usec_end = 0;
@@ -66,11 +67,25 @@ int main(int argc, char *argv[])
     CreatProcess_fork(2);
     // CreatProcess_vfork();
     
+    
+    //fifo_creat(fifo_name);
+    //fifo_WRBLOCK(fifo_name, "file_src.log");
+    
+    /*
+     * Here the process will be BLOCKED if you only uncomment the upper two lines.
+     * beause there is no process to read the FIFO, the write fifo process is waiting.
+    */
+    //We can make another process so that to test:
+    //1.Copy the lesson1 folder to lesson2: cp -R lesson1 lesson2
+    //2.make the lesson1 as fifo_WRBLOCK: Just comment the fifo_RDBLOCK(fifo_name, "file_dst.log")
+    //3.make the lesson2 as fifo_RDBLOCK: Just comment the fifo_WRBLOCK(fifo_name, "file_src.log")
+
+    // fifo_RDBLOCK(fifo_name, "file_dst.log");
+
     if(execlp("ls", "ls", "/etc", NULL) < 0)
         perror("execp error"); //display the error information to stdout.
 
     //system("ls -a /etc/passwd");
-
     exit(EXIT_SUCCESS);
 
 }
