@@ -10,6 +10,9 @@
 #include <string.h>
 #include "process.h"
 #include "myfifo.h"
+#include "mysignal.h"
+#include "shmdata.h"
+#include "shmem.h"
 /*ERROR INFORMATION ABOUT exit(i):
  *0 : Success
  *1 : Operation not permission
@@ -25,7 +28,7 @@
 int main(int argc, char *argv[])
 {   
     static char src_chars[100] = "This is a test of put_chars";
-    static char *fifo_name = "/home/cme/WorkspaceForTQ210/Study/LinuxApp/lesson1/fifotest";
+    //static char *fifo_name = "/home/cme/WorkspaceForTQ210/Study/LinuxApp/lesson1/fifotest";
     char buf[100];
     char timenow[30];
     long int usec_start = 0, usec_end = 0;
@@ -82,10 +85,27 @@ int main(int argc, char *argv[])
 
     // fifo_RDBLOCK(fifo_name, "file_dst.log");
 
-    if(execlp("ls", "ls", "/etc", NULL) < 0)
-        perror("execp error"); //display the error information to stdout.
+
+    //kill_test();
+    //alarm_pause_test();
+    //signal_test();
+    //sigaction_test();
+    //if(execlp("ls", "ls", "/etc", NULL) < 0)
+        //perror("execp error"); //display the error information to stdout.
 
     //system("ls -a /etc/passwd");
-    exit(EXIT_SUCCESS);
+
+
+    /*
+     * Here we need to make some process to test the shared memory
+    */
+    //We can make another process so that to test:
+    //1.Copy the lesson1 folder to lesson2: cp -R lesson1 lesson2
+    //2.make the lesson1 as shmread.
+    //3.make the lesson2 as shmwrite.
+
+    //shmread(1234);
+    shmwrite(1234);
+    // exit(EXIT_SUCCESS);
 
 }
