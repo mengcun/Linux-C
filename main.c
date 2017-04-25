@@ -14,6 +14,7 @@
 #include "shmdata.h"
 #include "shmem.h"
 #include "message.h"
+#include "semaphore.h"
 /*ERROR INFORMATION ABOUT exit(i):
  *0 : Success
  *1 : Operation not permission
@@ -107,7 +108,6 @@ int main(int argc, char *argv[])
 
     //shmread(1234);
     //shmwrite(1234);
-    // exit(EXIT_SUCCESS);
 
     /*
      * Here we need to make some process to test the message.
@@ -118,6 +118,15 @@ int main(int argc, char *argv[])
     //3.make the lesson2 as msgreceive.
 
     //msgsend(5678);
-    msgreceive(5678);
+    //msgreceive(5678);
+
+    
+    /*
+     * Here we need to make some process to test the semaphore
+    */
+    //We can make another process so that to test:
+    //1.Copy the lesson1 folder to lesson2: cp -R lesson1 lesson2
+    //2.Run both of the APP.
+    test_semaphore();
     // exit(EXIT_SUCCESS);
 }
