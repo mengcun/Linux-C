@@ -15,6 +15,7 @@
 #include "shmem.h"
 #include "message.h"
 #include "semaphore.h"
+#include "mypthread.h"
 /*ERROR INFORMATION ABOUT exit(i):
  *0 : Success
  *1 : Operation not permission
@@ -29,12 +30,21 @@
  * */
 int main(int argc, char *argv[])
 {   
-    static char src_chars[100] = "This is a test of put_chars";
+    //static char src_chars[100] = "This is a test of put_chars";
     //static char *fifo_name = "/home/cme/WorkspaceForTQ210/Study/LinuxApp/lesson1/fifotest";
     char buf[100];
     char timenow[30];
     long int usec_start = 0, usec_end = 0;
     
+    getcwd(buf,sizeof(buf));
+    printf("The current path is:%s\n", buf);
+    
+    strcpy(timenow,current_time());
+    printf("The current time is %s\n", timenow);
+
+    usec_start = timeoftoday();
+    printf("current start time: %ld\n", usec_start);
+   /*
     if(argc < 3)
     {
         printf("Please input the filename and try again\n");
@@ -53,23 +63,10 @@ int main(int argc, char *argv[])
 
     if(access(argv[1],R_OK|W_OK|F_OK|X_OK) != 0)
         printf("%s doesn't have the all permission!\n", argv[1]);
-
-    getcwd(buf,sizeof(buf));
-    printf("The current path is:%s\n", buf);
     
-    strcpy(timenow,current_time());
-    printf("The current time is %s\n", timenow);
-
-    usec_start = timeoftoday();
-    printf("current time: %ld\n", usec_start);
-   
-    usec_end = timeoftoday();
-
-    printf("current time: %ld\n", usec_end);
-    
-    printf("The process cost %d useconds\n", timemeasure(usec_start, usec_end));
 
     CreatProcess_fork(2);
+    */
     // CreatProcess_vfork();
     
     
@@ -127,6 +124,14 @@ int main(int argc, char *argv[])
     //We can make another process so that to test:
     //1.Copy the lesson1 folder to lesson2: cp -R lesson1 lesson2
     //2.Run both of the APP.
-    test_semaphore();
+    
+    //test_semaphore();
+    
+    
+    test_pthread();
+    
+    usec_end = timeoftoday();
+    printf("current time: %ld\n", usec_end);
+    printf("The process cost %d useconds\n", timemeasure(usec_start, usec_end));
     // exit(EXIT_SUCCESS);
 }

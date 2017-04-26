@@ -91,7 +91,7 @@ void kill_test()
             //Send the signal to parent process by kill
             kill(getppid(),SIGALRM);
             printf("The child process %d has sent the signal to parent process %d\n", getpid(), getppid());
-            exit(EXIT_SUCCESS);
+            //exit(EXIT_SUCCESS);
             break;
         default:
             break;

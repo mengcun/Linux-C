@@ -56,7 +56,7 @@ void CreatProcess_fork(int wait_child)
             exit(EXIT_FAILURE);
         }
         close(pipe_fd[0]);//close the pipe read point.
-        exit(EXIT_SUCCESS);
+        //exit(EXIT_SUCCESS);
     }
     else//This is parent process
     {

@@ -100,7 +100,7 @@ void fifo_WRBLOCK(char *fifo_name, char *src_data)
     }
     close(fifo_fd);
     printf("Process %d finished to wtite size of data %d into FIFO %s from %s\n", getpid(),bytes_sent, fifo_name, src_data);
-    exit(EXIT_SUCCESS);
+    //exit(EXIT_SUCCESS);
 }
 
 /*
@@ -163,5 +163,5 @@ void fifo_RDBLOCK(char *fifo_name, char *dst_data)
     }
     close(fifo_fd);
     printf("Process %d finished to wtite size of data %d into dst_data file %s from %s\n", getpid(), bytes_sent, dst_data, fifo_name);
-    exit(EXIT_SUCCESS);
+    //exit(EXIT_SUCCESS);
 }
