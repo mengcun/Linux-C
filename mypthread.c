@@ -10,6 +10,8 @@
 #include <pthread.h>
 #include "mypthread.h"
 
+
+pthread_mutex_t mutex;
 /*
  *This is a struct used by function which will be called by thread.
  * */
@@ -107,6 +109,42 @@ void *creat_member(void *arg)
     return (void *)0;
 }
 
+/*
+ *This is the function that will be called for test the mutex
+ * */
+
+void *thread_mutex_func(void *arg)
+{
+    int i = 0;
+    char *ptr = arg;
+    sleep(1); //make the thread sleep so that the other thread have the chance to run.
+    // lock the mutex, so that only this thread will be run
+    pthread_mutex_lock(&mutex);
+    printf("PID:%d, The mutex has been locked by thread_mutex_func.\n", getpid());
+
+    for(i = 0; ptr[i] != '\0'; ++i)
+        if(ptr[i] >= 'a' && ptr[i] <= 'z')
+        {
+            ptr[i] -= 'a' - 'A';
+        }
+    printf("PID:%d, Get %d characters\n", getpid(), i-1);
+    printf("OID:%d, Uppercase the characters: %s\n", getpid(), ptr);
+    //unlock the mutex so that other thread can access into arg
+    printf("PID:%d, The mutex has been unlocked by thread_mutex_func.\n", getpid());
+    pthread_mutex_unlock(&mutex);
+    sleep(1); //This is for other thread can have chance to run.
+    //Then lock the mutex again
+    printf("PID:%d, The mutex will be locked again by thread_mutex_func.\n", getpid());
+    pthread_mutex_lock(&mutex);
+    printf("PID:%d, The mutex has been locked again by thread_mutex_func.\n", getpid());
+    
+    //unlock the mutex after finished.
+    pthread_mutex_unlock(&mutex);
+    //exit the thread_mutex_func
+    printf("PID:%d, the Uppercase finished and the pthread_mutex will exit\n", getpid());
+    return (void *)3;
+    pthread_exit(NULL);
+}
 
 /*
  *This is the test for pthread! 
@@ -116,14 +154,41 @@ void test_pthread()
 {
     int i;
     int errnum;
+    
+    pthread_t pthread_mutex_id;
     pthread_t pthread_id;
     pthread_t pthread1_id;
     pthread_t pthread2_id;
+
+    static char arg[512] = {"this is the test for pthread_mutex\n"};
+
     struct member *data;
     void *backfromfunc;
     data = (struct member *)malloc(sizeof(struct member));
     data -> a = 100;
     data -> s = "This is the test for pthread";
+
+    //Initial the mutex by defaut
+    if((errnum = pthread_mutex_init(&mutex, NULL)) != 0)
+    {
+        printf("PID:%d, Initial the pthread_mutex failed.\n", getpid());
+        perror("Initial pthread_mutex failed.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    //Create the pthread_mutex_id and run the function for pthread
+    if((errnum = pthread_create(&pthread_mutex_id, NULL, thread_mutex_func, arg)) != 0)
+    {
+        printf("PID:%d, Create pthread_mutex_id failed:%d:%s\n", getpid(), errnum, strerror(errnum));
+        exit(EXIT_FAILURE);
+    }
+    printf("PID:%d, Create pthread_mutex_id(%d) success\n", getpid(), (int)pthread_mutex_id);
+    
+    //Lock the mutex so that only this thread can use the arg
+    printf("PID:%d, Lock the mutex first time by test_pthread\n", getpid());
+    pthread_mutex_lock(&mutex);
+
+    printf("PID:%d, This is in process after first lock\n", getpid());
 
     //Create the pthread_id and run the function for pthread
     if((errnum = pthread_create(&pthread_id, NULL, creat_member, (void *)data)) != 0)
@@ -148,7 +213,18 @@ void test_pthread()
         exit(EXIT_FAILURE);
     }
     printf("PID:%d, Create pthread2_id(%d) success\n", getpid(), (int)pthread2_id);
+
+    //Unlock the mutex first time so that other thread can access into the arg
+    printf("PID:%d, Unlock the mutex first time by test_pthread\n", getpid());
+    pthread_mutex_unlock(&mutex);
+    //Here the main thread will sleep so that other threads have chance to execute.
+    sleep(2);
+    //Lock the mutex second time so that only this thread can use the arg
+    printf("PID:%d, Lock the mutex second time by test_pthread\n", getpid());
+    pthread_mutex_lock(&mutex);
     
+    printf("PID:%d, This is in process after second lock\n", getpid());
+
     //waiting the thread_id finished. 
     printf("PID:%d, waiting for the pthread_id to exit\n", getpid());
     if((errnum = pthread_join(pthread_id, &backfromfunc)) != 0)
@@ -181,4 +257,26 @@ void test_pthread()
         sleep(2);
         printf("PID:%d, This is in process\n", getpid());
     }
+
+    //Unlock the mutex second time so that other thread can access into the arg
+    printf("PID:%d, Unlock the mutex second time by test_pthread\n", getpid());
+    pthread_mutex_unlock(&mutex);
+    //Here the main thread will sleep so that other threads have chance to execute.
+    sleep(2);
+    //Lock the mutex third time so that only this thread can use the arg
+    //printf("PID:%d, Lock the mutex third time by test_pthread\n", getpid());
+    //pthread_mutex_lock(&mutex);
+    
+    printf("PID:%d, This is in process\n", getpid());
+
+    //waiting the pthread_mutex_id finished. 
+    printf("PID:%d, waiting for the pthread_mutex_id to exit\n", getpid());
+    if((errnum = pthread_join(pthread_mutex_id, &backfromfunc)) != 0)
+    {
+        printf("PID:%d, Waiting the pthread_mutex_id failed:%d:%s\n", getpid(), errnum, strerror(errnum));
+        exit(EXIT_FAILURE);
+    }
+    printf("PID:%d, received the code %d when pthread_mutex_id exit\n", getpid(), (int)backfromfunc);
+    
+    pthread_mutex_destroy(&mutex);
 }

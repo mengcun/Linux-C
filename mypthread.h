@@ -13,6 +13,7 @@ void *clean(void *arg);
 void *thread1_func(void *arg_cntl);
 void *thread2_func(void *arg_cntl);
 void *creat_member(void *arg);
+void *thread_mutex_func(void *arg);
 void test_pthread();
 #ifdef __cplusplus
 }
