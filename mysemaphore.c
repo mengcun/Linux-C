@@ -1,4 +1,4 @@
-/*File name: semaphore.c
+/*File name: mysemaphore.c
  *Type: C source file
  *Date: 2017/04/26 
  */
@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <string.h>
-#include "semaphore.h"
+#include "mysemaphore.h"
 
 static int sem_id;
 

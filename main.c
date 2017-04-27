@@ -14,7 +14,7 @@
 #include "shmdata.h"
 #include "shmem.h"
 #include "message.h"
-#include "semaphore.h"
+#include "mysemaphore.h"
 #include "mypthread.h"
 /*ERROR INFORMATION ABOUT exit(i):
  *0 : Success

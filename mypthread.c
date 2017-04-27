@@ -8,10 +8,13 @@
 #include <errno.h>
 #include <string.h>
 #include <pthread.h>
+#include <semaphore.h>
 #include "mypthread.h"
 
 
 pthread_mutex_t mutex;
+sem_t sem;
+sem_t sem_add;
 /*
  *This is a struct used by function which will be called by thread.
  * */
@@ -147,6 +150,44 @@ void *thread_mutex_func(void *arg)
 }
 
 /*
+ *This is the function that will be called for test the mutex
+ * */
+
+void *thread_sem_func(void *msg)
+{
+    int i = 0;
+    char *ptr = msg;
+    sleep(1); //make the thread sleep so that the other thread have the chance to run.
+    printf("PID:%d, I get the sem.\n", getpid());
+    // minus the sem and occupyed by thread_sem_func
+    sem_wait(&sem);
+    printf("PID:%d, The sem -1 and occupyed by thread_sem_func .\n", getpid());
+
+    for(i = 0; ptr[i] != '\0'; ++i)
+        if(ptr[i] >= 'a' && ptr[i] <= 'z')
+        {
+            ptr[i] -= 'a' - 'A';
+        }
+    printf("PID:%d, Get %d characters\n", getpid(), i-1);
+    printf("OID:%d, Uppercase the characters: %s\n", getpid(), ptr);
+    // add the sem +1 that means this thread_sem_func finished.
+    printf("PID:%d, The sem_add +1 and Uppercase finished.\n", getpid());
+    sem_post(&sem_add);
+
+    printf("PID:%d, This is in thread_sem_func after first sem_wait(&sem)\n", getpid());
+    sleep(1); //This is for other thread can have chance to run.
+   
+    printf("PID:%d, I get the sem again.\n", getpid());
+    // minus the sem again and occupyed by thread_sem_func
+    sem_wait(&sem);
+    printf("PID:%d, The sem -1 again and occupyed by thread_sem_func again.\n", getpid());
+    sem_post(&sem_add);
+    printf("PID:%d, The sem_add +1 and thread finished and will exit.\n", getpid());
+    return (void *)4;
+    pthread_exit(NULL);
+}
+
+/*
  *This is the test for pthread! 
  * */
 
@@ -156,17 +197,35 @@ void test_pthread()
     int errnum;
     
     pthread_t pthread_mutex_id;
+    pthread_t pthread_sem_id;
     pthread_t pthread_id;
     pthread_t pthread1_id;
     pthread_t pthread2_id;
 
     static char arg[512] = {"this is the test for pthread_mutex\n"};
+    static char msg[512] = {"this is the test for pthread_sem\n"};
 
     struct member *data;
     void *backfromfunc;
     data = (struct member *)malloc(sizeof(struct member));
     data -> a = 100;
     data -> s = "This is the test for pthread";
+
+    //Initial the sem by defaut
+    if((errnum = sem_init(&sem, 0, 0)) != 0)
+    {
+        printf("PID:%d, Initial the sem failed.\n", getpid());
+        perror("Initial sem failed.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    //Initial the sem_add by 1
+    if((errnum = sem_init(&sem_add, 0, 1)) != 0)
+    {
+        printf("PID:%d, Initial the sem_add failed.\n", getpid());
+        perror("Initial sem_add failed.\n");
+        exit(EXIT_FAILURE);
+    }
 
     //Initial the mutex by defaut
     if((errnum = pthread_mutex_init(&mutex, NULL)) != 0)
@@ -175,6 +234,38 @@ void test_pthread()
         perror("Initial pthread_mutex failed.\n");
         exit(EXIT_FAILURE);
     }
+
+    //Create the pthread_sem_id and run the function for pthread
+    if((errnum = pthread_create(&pthread_sem_id, NULL, thread_sem_func, msg)) != 0)
+    {
+        printf("PID:%d, Create pthread_sem_id failed:%d:%s\n", getpid(), errnum, strerror(errnum));
+        exit(EXIT_FAILURE);
+    }
+    printf("PID:%d, Create pthread_sem_id(%d) success\n", getpid(), (int)pthread_sem_id);
+
+    //minus sem_add -1 and the process will occupyed
+    printf("PID:%d, sem_add will be -1 first time by test_pthread\n", getpid());
+    sem_wait(&sem_add);
+    printf("PID:%d, sem_add has -1 in process first time by test_pthread\n", getpid());
+    printf("PID:%d, This is in process after first sem_wait(&sem_add)\n", getpid());
+   
+    //add sem +1 and the process will occupyed by thread_sem_func
+    printf("PID:%d, sem will be +1 first time by test_pthread and will run thread_sem_func\n", getpid());
+    sem_post(&sem);
+    
+    sleep(2);
+    
+    printf("PID:%d, sem has +1 in process first time by test_pthread\n", getpid());
+    
+    printf("PID:%d, sem will be +1 second time by test_pthread and will run thread_sem_func again\n", getpid());
+    sem_post(&sem);
+    printf("PID:%d, sem has +1 in process second time by test_pthread\n", getpid());
+    
+    sleep(1);
+    
+    printf("PID:%d, sem_add will  +1 in thread_sem_func\n", getpid());
+    sem_wait(&sem_add);
+    printf("PID:%d, sem has +1 in process first time by test_pthread\n", getpid());
 
     //Create the pthread_mutex_id and run the function for pthread
     if((errnum = pthread_create(&pthread_mutex_id, NULL, thread_mutex_func, arg)) != 0)
@@ -263,9 +354,6 @@ void test_pthread()
     pthread_mutex_unlock(&mutex);
     //Here the main thread will sleep so that other threads have chance to execute.
     sleep(2);
-    //Lock the mutex third time so that only this thread can use the arg
-    //printf("PID:%d, Lock the mutex third time by test_pthread\n", getpid());
-    //pthread_mutex_lock(&mutex);
     
     printf("PID:%d, This is in process\n", getpid());
 
@@ -278,5 +366,18 @@ void test_pthread()
     }
     printf("PID:%d, received the code %d when pthread_mutex_id exit\n", getpid(), (int)backfromfunc);
     
+    sleep(2);
+    
+    //waiting the pthread_sem_id finished. 
+    printf("PID:%d, waiting for the pthread_sem_id to exit\n", getpid());
+    if((errnum = pthread_join(pthread_sem_id, &backfromfunc)) != 0)
+    {
+        printf("PID:%d, Waiting the pthread_sem_id failed:%d:%s\n", getpid(), errnum, strerror(errnum));
+        exit(EXIT_FAILURE);
+    }
+    printf("PID:%d, received the code %d when pthread_sem_id exit\n", getpid(), (int)backfromfunc);
+    
     pthread_mutex_destroy(&mutex);
+    sem_destroy(&sem);
+    sem_destroy(&sem_add);
 }

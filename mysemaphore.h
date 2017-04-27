@@ -1,10 +1,10 @@
-/*File name: semaphore.h
+/*File name: mysemaphore.h
  *Type: C header file
  *Date: 2017/04/26
  */
 
-#ifndef SEMAPHORE_H
-#define SEMAPHORE_H
+#ifndef MYSEMAPHORE_H
+#define MYSEMAPHORE_H
 
 #ifdef __cplusplus
 extern "C"{
