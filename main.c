@@ -16,8 +16,8 @@
 #include "message.h"
 #include "mysemaphore.h"
 #include "mypthread.h"
-#include "tcp_server.h"
-#include "tcp_client.h"
+#include "server.h"
+#include "client.h"
 /*ERROR INFORMATION ABOUT exit(i):
  *0 : Success
  *1 : Operation not permission
@@ -138,9 +138,22 @@ int main(int argc, char *argv[])
     /*
      *Here is the test for socket:
      * */
-
-    tcp_client();
+    //We can make another process so that to test:
+    //1.Copy the lesson1 folder to lesson2: cp -R lesson1 lesson2
+    //2.Run both of the APP.
+    
+    //tcp_client();
     //tcp_server();
+    
+    /*
+     *Here is the test for udp:
+     * */
+    //We can make another process so that to test:
+    //1.Copy the lesson1 folder to lesson2: cp -R lesson1 lesson2
+    //2.Run both of the APP.
+    
+    //udp_client();
+    //udp_server();
 
     usec_end = timeoftoday();
     printf("current time: %ld\n", usec_end);

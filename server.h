@@ -1,16 +1,17 @@
-/*File name: tcp_server.h
+/*File name: server.h
  *Type: C header file
  *Date: 2017/04/27
  */
 
-#ifndef TCP_SERVER_H
-#define TCP_SERVER_H
+#ifndef SERVER_H
+#define SERVER_H
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
 void tcp_server();
+void udp_server();
 
 #ifdef __cplusplus
 }

@@ -1,4 +1,4 @@
-/*File name: tcp_server.c
+/*File name: server.c
  *Type: C source file
  *Date: 2017/05/02 
  */
@@ -12,7 +12,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include "tcp_client.h"
+#include "client.h"
 
 #define portnumber 3333
 
@@ -90,3 +90,62 @@ void tcp_server()
    close(socket_fd);
 }
 
+/*
+ *The process about UDP_SERVER:
+ *1.Creat the socket by socket();
+ *2.Bind the IP address, portnumber to socket by bind();
+ *3.Then, using recefrom() to reveive data;
+ *4.Close the internet connect;
+ * */
+
+void udp_server()
+{
+    static int socket_fd, client_len;
+    static char buffer[1024];
+    struct sockaddr_in server_addr;
+    struct sockaddr_in client_addr;
+    
+    //Creat the socket in client: AF_INET = internet, SOCK_STREAM = tcp
+    if((socket_fd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+    {
+        printf("PID:%d, Creat the socket Error:%s\a\n", getpid(), strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    
+    //Config the Server IP address and portnumber
+    bzero(&server_addr, sizeof(server_addr));//Initial as 0
+    server_addr.sin_family = AF_INET;// This is IPV4
+    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    server_addr.sin_port = htons(portnumber);//portnumber: this should change the short data in PC to the short data on internet.
+    
+    //Bind the socket_fd
+    if(bind(socket_fd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr_in)) < 0)
+    {
+        printf("PID:%d, Binding the socket Error:%s\a\n", getpid(), strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    while(1)
+    {
+        bzero(buffer, 1024);//Initial the buffer.
+        //Receive the data responed from server. We didn't care the source where data come from.
+        recvfrom(socket_fd, buffer, sizeof(buffer), 0, (struct sockaddr *)&client_addr, &client_len);
+        printf("PID:%d, Get data from client:%s\n", getpid(), buffer);
+        if(fork() < 0)
+        {
+            perror("creat process error"); //display the error information to stdout.
+            printf("Error occured when creat the process (ID %d): %s\n", getpid(), strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        else
+        {
+            //use the child-process to handle the data.
+            //Send out the data after the handle.
+            sleep(5);
+            sendto(socket_fd, buffer, sizeof(buffer), 0, (struct sockaddr *)&client_addr, sizeof(struct sockaddr_in));
+            printf("PID:%d, sendout the data after handle:%s\n", getpid(), buffer);
+            exit(EXIT_SUCCESS);
+        }
+    }
+    //Close the internet
+    close(socket_fd);
+}

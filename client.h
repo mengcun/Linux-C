@@ -1,16 +1,17 @@
-/*File name: tcp_client.h
+/*File name: client.h
  *Type: C header file
  *Date: 2017/04/27
  */
 
-#ifndef TCP_CLIENT_H
-#define TCP_CLIENT_H
+#ifndef CLIENT_H
+#define CLIENT_H
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
 void tcp_client();
+void udp_client();
 
 #ifdef __cplusplus
 }
