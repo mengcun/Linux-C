@@ -16,6 +16,8 @@
 #include "message.h"
 #include "mysemaphore.h"
 #include "mypthread.h"
+#include "tcp_server.h"
+#include "tcp_client.h"
 /*ERROR INFORMATION ABOUT exit(i):
  *0 : Success
  *1 : Operation not permission
@@ -128,8 +130,18 @@ int main(int argc, char *argv[])
     //test_semaphore();
     
     
-    test_pthread();
+    /*
+     * Here is the test for thread
+     * */
+    //test_pthread();
     
+    /*
+     *Here is the test for socket:
+     * */
+
+    tcp_client();
+    //tcp_server();
+
     usec_end = timeoftoday();
     printf("current time: %ld\n", usec_end);
     printf("The process cost %d useconds\n", timemeasure(usec_start, usec_end));
